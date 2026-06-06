@@ -19,9 +19,11 @@ jobs:
         # package.json の engines.node >=20 を被覆（LTS + 最新安定）。
         node: ['20', '22', '24']
     steps:
-      - uses: actions/checkout@v4
+      # v5 系は Node 24 ランタイムで動く（v4 は内部 Node 20 で 2026 に非推奨）。
+      # この node-version はツールを動かす Node であり、上の matrix を受ける。
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
 
