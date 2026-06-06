@@ -24,17 +24,38 @@ function isDir(p) {
   try { return statSync(p).isDirectory(); } catch { return false; }
 }
 
-// 対象の docs/decisions/ ディレクトリの絶対パスを返す。
-// explicit が与えられればそれを優先（`ema view <dir>` 用）。
-export function findAdrDir(explicit) {
-  if (explicit) return resolve(explicit);
+// 対象 docs/decisions/ を「どう解決したか」を添えて返す（メカニズムとポリシーの分離）。
+// reason:
+//   'explicit'             … 引数で明示指定された（`ema view <dir>` 等）
+//   'found-ancestor'       … cwd/祖先に docs/decisions/ を発見した（通常運用）
+//   'fell-back-to-tool-repo' … 見つからずツール自身のリポジトリへフォールバックした
+// 書き込み系（new）はこの reason を見て「サイレントな誤配置」を防ぐ判断ができる。
+// 解決そのものは副作用を持たない純粋関数とし、停止/警告は呼び出し側に委ねる（Parnas 1972）。
+export function resolveAdrDir(explicit) {
+  if (explicit) return { dir: resolve(explicit), reason: 'explicit' };
   let dir = process.cwd();
   for (;;) {
     const candidate = join(dir, DECISIONS_REL);
-    if (isDir(candidate)) return candidate;
+    if (isDir(candidate)) return { dir: candidate, reason: 'found-ancestor' };
     const parent = dirname(dir);
     if (parent === dir) break; // ファイルシステムのルートに到達
     dir = parent;
   }
-  return join(TOOL_REPO_ROOT, DECISIONS_REL);
+  return { dir: join(TOOL_REPO_ROOT, DECISIONS_REL), reason: 'fell-back-to-tool-repo' };
+}
+
+// 解決理由の人間向け説明（warn / where / dry-run の表示に使う）。
+export function describeReason(reason) {
+  switch (reason) {
+    case 'explicit': return '明示指定';
+    case 'found-ancestor': return '作業ディレクトリ（祖先）の docs/decisions/';
+    case 'fell-back-to-tool-repo': return '（フォールバック）ema ツール自身のリポジトリ';
+    default: return reason;
+  }
+}
+
+// 対象の docs/decisions/ ディレクトリの絶対パスだけを返す後方互換ラッパ。
+// 読み取り系（view/gen/lint）はこれで足りる。
+export function findAdrDir(explicit) {
+  return resolveAdrDir(explicit).dir;
 }
