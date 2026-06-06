@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: セキュリティ脆弱性の報告（非公開）
+    url: https://github.com/9uiLe/ema/security/advisories/new
+    about: 脆弱性は公開 Issue ではなく、Private vulnerability reporting から報告してください。

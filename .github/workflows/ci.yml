@@ -1,0 +1,39 @@
+name: CI
+
+# 流し読み防止の検証ゲートを push / PR で強制する（ADR-0002 / ADR-0003）。
+# このツールは外部依存ゼロ（Node 標準のみ）なので npm install / npm ci は不要。
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # package.json の engines.node >=20 を被覆（LTS + 最新安定）。
+        node: ['20', '22', '24']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      # 依存ゼロ＝インストール工程なし。各ゲートは終了コードで通知する。
+      - name: Unit tests (node:test)
+        run: node --test
+
+      - name: Lint ADR slots (固定 / 反証スロット充足)
+        run: node bin/ema.mjs lint
+
+      # 生成 HTML は gitignore（ADR-0002）なので clean clone には .html が無い。
+      # よって `--check`（HTML 差分検出・ローカル用）ではなく、生成そのものを
+      # スモークテストとして使う：全 .md が例外なくレンダリングできることを確認する。
+      - name: Render smoke test (全 .md が描画できるか)
+        run: node bin/ema.mjs gen
