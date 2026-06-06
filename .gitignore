@@ -1,0 +1,7 @@
+# 生成物：レビュー用 HTML（正本は .md のみコミット — ADR-0002）
+# clone 後は `ema gen` で再生成する。
+docs/decisions/*.html
+
+# OS / ツール
+.DS_Store
+node_modules/

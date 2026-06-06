@@ -1,0 +1,29 @@
+{
+  "name": "ema",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "流暢性の罠を断つ ADR ワークフローの統一 CLI（外部依存ゼロ・Node 標準のみ）",
+  "keywords": [
+    "adr",
+    "architecture-decision-records",
+    "cli",
+    "zero-dependency"
+  ],
+  "bin": {
+    "ema": "bin/ema.mjs"
+  },
+  "scripts": {
+    "new": "node bin/ema.mjs new",
+    "gen": "node bin/ema.mjs gen",
+    "lint": "node bin/ema.mjs lint",
+    "view": "node bin/ema.mjs view",
+    "check": "node bin/ema.mjs gen --check",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {}
+}
